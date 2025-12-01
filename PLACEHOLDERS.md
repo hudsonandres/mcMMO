@@ -37,7 +37,7 @@ Returns the player's current level in the specified skill.
 
 **Examples:**
 - `%mcmmo_level_mining%` - Returns Mining level (e.g., "75")
-- `%mcmmo_level_combat%` - Returns Combat level
+- `%mcmmo_level_swords%` - Returns Swords level
 - `%mcmmo_level_woodcutting%` - Returns Woodcutting level
 
 ### Current Skill XP
@@ -56,7 +56,7 @@ Returns the total amount of XP needed to reach the next level.
 
 **Examples:**
 - `%mcmmo_xp_needed_mining%` - Returns XP needed (e.g., "2000")
-- `%mcmmo_xp_needed_combat%` - Returns XP needed for next level
+- `%mcmmo_xp_needed_swords%` - Returns XP needed for next level
 
 ### XP Remaining for Next Level
 **Syntax:** `%mcmmo_xp_remaining_<skill>%`
@@ -74,7 +74,7 @@ Returns the player's position in the leaderboard for that skill.
 
 **Examples:**
 - `%mcmmo_rank_mining%` - Returns "12" if the player is in 12th place
-- `%mcmmo_rank_combat%` - Position in Combat ranking
+- `%mcmmo_rank_swords%` - Position in Swords ranking
 
 ### Skill XP Rate
 **Syntax:** `%mcmmo_xprate_<skill>%`
@@ -182,7 +182,7 @@ Returns the value (level or power level) of the player at position X in the rank
 
 **Examples:**
 - `%mcmmo_mctop_mining:1%` - Returns the Mining level of the 1st place player
-- `%mcmmo_mctop_combat:5%` - Returns the Combat level of the 5th place player
+- `%mcmmo_mctop_swords:5%` - Returns the Swords level of the 5th place player
 - `%mcmmo_mctop_overall:1%` - Returns the power level of the 1st place player
 
 ### Get Player Name at Position X (✨ NEW)
@@ -195,7 +195,7 @@ Returns the player's name at position X in the ranking.
 
 **Examples:**
 - `%mcmmo_mctop_name_mining:1%` - Returns the name of the 1st place player in Mining
-- `%mcmmo_mctop_name_combat:10%` - Returns the name of the 10th place player in Combat
+- `%mcmmo_mctop_name_swords:10%` - Returns the name of the 10th place player in Swords
 - `%mcmmo_mctop_name_overall:1%` - Returns the name of the 1st place player in overall ranking
 
 ### Get Your Overall Rank Position (✨ NEW)
@@ -223,7 +223,7 @@ Checks if the player has reached the required level in a specific skill.
 
 **Examples:**
 - `%mcmmo_checklevel_mining:50%` - Returns ✔ if player has Mining level 50+, otherwise ✘
-- `%mcmmo_checklevel_combat:100%` - Returns ✔ if player has Combat level 100+, otherwise ✘
+- `%mcmmo_checklevel_swords:100%` - Returns ✔ if player has Swords level 100+, otherwise ✘
 - `%mcmmo_checklevel_woodcutting:25%` - Returns ✔ if player has Woodcutting level 25+, otherwise ✘
 
 ---
@@ -286,7 +286,7 @@ display:
   lore:
     - "&7Requirements:"
     - "&7Mining Level 50: %mcmmo_checklevel_mining:50%"
-    - "&7Combat Level 75: %mcmmo_checklevel_combat:75%"
+    - "&Swords Level 75: %mcmmo_checklevel_swords:75%"
     - "&7Woodcutting Level 30: %mcmmo_checklevel_woodcutting:30%"
 ```
 

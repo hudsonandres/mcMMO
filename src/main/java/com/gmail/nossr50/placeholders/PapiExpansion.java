@@ -200,12 +200,12 @@ public class PapiExpansion extends PlaceholderExpansion {
 
     public List<PlayerStat> getLeaderboard(PrimarySkillType skill, int position) {
         try {
-            // Calculate which page to fetch (10 entries per page by default)
-            int statsPerPage = 10;
-            int pageNumber = ((position - 1) / statsPerPage) + 1;
+            // Fetch only the specific entry needed  
+            int statsPerPage = 1;  
+            int pageNumber = position; // Assuming readLeaderboard uses pageNumber as offset for single entry
             
             return mcMMO.getDatabaseManager().readLeaderboard(skill, pageNumber, statsPerPage);
-        } catch (RuntimeException ex) {
+        } catch (InvalidSkillException ex) {
             return null;
         }
     }
@@ -241,13 +241,13 @@ public class PapiExpansion extends PlaceholderExpansion {
             //%mcmmo_xprate_<skillname>%
             registerPlaceholder(new SkillXpRatePlaceholder(this, skill));
 
-            //%mcmmo_mctop_<skillname>_<position>%
-            registerPlaceholder(new McTopPositionPlaceholder(this, skill, false));
+            //%mcmmo_mctop_<skillname>:<position>%
+            registerPlaceholder(new McTopPositionPlaceholder(this, skill));
 
-            //%mcmmo_mctop_name_<skillname>_<position>%
-            registerPlaceholder(new McTopPositionPlaceholder(this, skill, true));
+            //%mcmmo_mctop_name_<skillname>:<position>%
+            registerPlaceholder(new McTopNamePlaceholder(this, skill));
 
-            //%mcmmo_checklevel_<skillname>_<level>%
+            //%mcmmo_checklevel_<skillname>:<level>%
             registerPlaceholder(new CheckLevelPlaceholder(this, skill));
         }
 
@@ -281,11 +281,11 @@ public class PapiExpansion extends PlaceholderExpansion {
         // %mcmmo_rank_overall%
         registerPlaceholder(new OverallRankPlaceholder(this));
 
-        // %mcmmo_mctop_overall_<position>%
-        registerPlaceholder(new McTopPositionPlaceholder(this, null, false));
+        // %mcmmo_mctop_overall:<position>%
+        registerPlaceholder(new McTopPositionPlaceholder(this, null));
 
-        // %mcmmo_mctop_name_overall_<position>%
-        registerPlaceholder(new McTopPositionPlaceholder(this, null, true));
+        // %mcmmo_mctop_name_overall:<position>%
+        registerPlaceholder(new McTopNamePlaceholder(this, null));
     }
 
 }

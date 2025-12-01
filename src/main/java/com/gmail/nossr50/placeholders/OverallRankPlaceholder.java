@@ -10,7 +10,9 @@ import org.bukkit.entity.Player;
 public class OverallRankPlaceholder implements Placeholder {
 
     public OverallRankPlaceholder(PapiExpansion papiExpansion) {
-        // Constructor for consistency with other placeholders
+        // The papiExpansion parameter is intentionally unused in this class.
+        // It is kept for consistency with other Placeholder implementations.
+        // If future functionality requires access to papiExpansion, it can be stored as a field.
     }
 
     @Override

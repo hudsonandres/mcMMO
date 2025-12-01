@@ -15,6 +15,9 @@ public class CheckLevelPlaceholder implements Placeholder {
     public CheckLevelPlaceholder(PapiExpansion papiExpansion, PrimarySkillType skill) {
         this.papiExpansion = papiExpansion;
         this.skill = skill;
+        // The papiExpansion parameter is intentionally "unused" in this class.
+        // It's essential for the class to function properly.
+        // The placeholder needs access to the PapiExpansion instance to query skill levels.
     }
 
     @Override
