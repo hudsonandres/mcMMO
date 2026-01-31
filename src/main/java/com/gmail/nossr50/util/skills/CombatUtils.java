@@ -2,7 +2,9 @@ package com.gmail.nossr50.util.skills;
 
 import static com.gmail.nossr50.datatypes.experience.XPGainReason.PVP;
 import static com.gmail.nossr50.util.AttributeMapper.MAPPED_MOVEMENT_SPEED;
+import static com.gmail.nossr50.util.ItemUtils.isSpear;
 import static com.gmail.nossr50.util.MobMetadataUtils.hasMobFlag;
+import static com.gmail.nossr50.util.Permissions.canUseSubSkill;
 import static com.gmail.nossr50.util.skills.ProjectileUtils.isCrossbowProjectile;
 
 import com.gmail.nossr50.config.experience.ExperienceConfig;
@@ -19,6 +21,7 @@ import com.gmail.nossr50.skills.acrobatics.AcrobaticsManager;
 import com.gmail.nossr50.skills.archery.ArcheryManager;
 import com.gmail.nossr50.skills.axes.AxesManager;
 import com.gmail.nossr50.skills.maces.MacesManager;
+import com.gmail.nossr50.skills.spears.SpearsManager;
 import com.gmail.nossr50.skills.swords.SwordsManager;
 import com.gmail.nossr50.skills.taming.TamingManager;
 import com.gmail.nossr50.skills.tridents.TridentsManager;
@@ -129,6 +132,11 @@ public final class CombatUtils {
             return;
         }
 
+        // Hack to avoid other combat abilities applying to off-hand spear attacks
+        if (isSpear(player.getInventory().getItemInOffHand()) && isNotSwinging(mmoPlayer)) {
+            return;
+        }
+
         SwordsManager swordsManager = mmoPlayer.getSwordsManager();
         double boostedDamage = event.getDamage();
 
@@ -192,6 +200,11 @@ public final class CombatUtils {
 
         //Make sure the profiles been loaded
         if (mmoPlayer == null) {
+            return;
+        }
+
+        // Hack to avoid other combat abilities applying to off-hand spear attacks
+        if (isSpear(player.getInventory().getItemInOffHand()) && isNotSwinging(mmoPlayer)) {
             return;
         }
 
@@ -308,6 +321,11 @@ public final class CombatUtils {
             return;
         }
 
+        // Hack to avoid other combat abilities applying to off-hand spear attacks
+        if (isSpear(player.getInventory().getItemInOffHand()) && isNotSwinging(mmoPlayer)) {
+            return;
+        }
+
         final MacesManager macesManager = mmoPlayer.getMacesManager();
 
         // Apply Limit Break DMG
@@ -331,6 +349,46 @@ public final class CombatUtils {
         printFinalDamageDebug(player, event, mmoPlayer);
     }
 
+    private static void processSpearsCombat(@NotNull LivingEntity target,
+            @NotNull Player player,
+            @NotNull EntityDamageByEntityEvent event) {
+        if (event.getCause() == DamageCause.THORNS) {
+            return;
+        }
+
+        double boostedDamage = event.getDamage();
+
+        final McMMOPlayer mmoPlayer = UserManager.getPlayer(player);
+
+        //Make sure the profiles been loaded
+        if (mmoPlayer == null) {
+            return;
+        }
+
+        final SpearsManager spearsManager = mmoPlayer.getSpearsManager();
+
+        if (canUseSubSkill(player, SubSkillType.SPEARS_SPEAR_MASTERY)) {
+            boostedDamage += spearsManager.getSpearMasteryBonusDamage()
+                    * mmoPlayer.getAttackStrength();
+        }
+
+        // Apply Limit Break DMG
+        if (canUseLimitBreak(player, target, SubSkillType.SPEARS_SPEARS_LIMIT_BREAK)) {
+            boostedDamage += (getLimitBreakDamage(
+                    player, target, SubSkillType.SPEARS_SPEARS_LIMIT_BREAK)
+                    * mmoPlayer.getAttackStrength());
+        }
+
+
+        event.setDamage(boostedDamage);
+
+        // Apply any non-damage effects here
+        spearsManager.potentiallyApplyMomentum();
+
+        processCombatXP(mmoPlayer, target, PrimarySkillType.SPEARS);
+        printFinalDamageDebug(player, event, mmoPlayer);
+    }
+
     private static void processAxeCombat(@NotNull LivingEntity target, @NotNull Player player,
             @NotNull EntityDamageByEntityEvent event) {
         if (event.getCause() == DamageCause.THORNS) {
@@ -343,6 +401,11 @@ public final class CombatUtils {
 
         //Make sure the profiles been loaded
         if (mmoPlayer == null) {
+            return;
+        }
+
+        // Hack to avoid other combat abilities applying to off-hand spear attacks
+        if (isSpear(player.getInventory().getItemInOffHand()) && isNotSwinging(mmoPlayer)) {
             return;
         }
 
@@ -395,6 +458,11 @@ public final class CombatUtils {
 
         //Make sure the profiles been loaded
         if (mmoPlayer == null) {
+            return;
+        }
+
+        // Hack to avoid other combat abilities applying to off-hand spear attacks
+        if (isSpear(player.getInventory().getItemInOffHand()) && isNotSwinging(mmoPlayer)) {
             return;
         }
 
@@ -642,6 +710,15 @@ public final class CombatUtils {
                         .doesPlayerHaveSkillPermission(player, PrimarySkillType.MACES)) {
                     processMacesCombat(target, player, event);
                 }
+            } else if (isSpear(heldItem)) {
+                if (!mcMMO.p.getSkillTools()
+                        .canCombatSkillsTrigger(PrimarySkillType.SPEARS, target)) {
+                    return;
+                }
+                if (mcMMO.p.getSkillTools()
+                        .doesPlayerHaveSkillPermission(player, PrimarySkillType.SPEARS)) {
+                    processSpearsCombat(target, player, event);
+                }
             }
         } else if (entityType == EntityType.WOLF) {
             Wolf wolf = (Wolf) painSource;
@@ -872,8 +949,6 @@ public final class CombatUtils {
                 continue;
             }
 
-            //EventUtils.callFakeArmSwingEvent(attacker);
-
             switch (type) {
                 case SWORDS:
                     if (entity instanceof Player) {
@@ -935,7 +1010,8 @@ public final class CombatUtils {
         XPGainReason xpGainReason;
 
         if (target instanceof Player defender) {
-            if (!ExperienceConfig.getInstance().getExperienceGainsPlayerVersusPlayerEnabled()
+            if (defender.equals(mmoPlayer.getPlayer())
+                    || !ExperienceConfig.getInstance().getExperienceGainsPlayerVersusPlayerEnabled()
                     ||
                     (mcMMO.p.getPartyConfig().isPartyEnabled()
                             && mcMMO.p.getPartyManager()
@@ -1148,5 +1224,11 @@ public final class CombatUtils {
     public static void delayArrowMetaCleanup(@NotNull AbstractArrow arrow) {
         mcMMO.p.getFoliaLib().getScheduler()
                 .runLater(() -> ProjectileUtils.cleanupProjectileMetadata(arrow), 20 * 120);
+    }
+
+    public static boolean isNotSwinging(McMMOPlayer mmoPlayer) {
+        // If player has swung in the last second, it's extremely unlikely the damage originates
+        // from an off-hand spear charge attack
+        return mmoPlayer.getLastSwingTimestamp() + 500L < System.currentTimeMillis();
     }
 }
